@@ -13,6 +13,11 @@ services:
       - db_data:/var/lib/postgresql/data
     networks:
       - bms_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -q -h localhost -p 5432 -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   webapp:
     image: siva0/bms-backend
@@ -22,14 +27,10 @@ services:
     environment:
       DB_NAME: bms
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - bms_net
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -q -h postgres -p 5432 -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
 volumes:
   db_data:
